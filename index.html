@@ -229,22 +229,22 @@
 
     <!-- 일수 설정 -->
     <div class="section">
-      <div class="section-title">기준 일수 설정</div>
+      <div class="section-title">기준 기간 설정</div>
       <div class="field" id="uploadDaysField">
         <label>채널 마지막 업로드 기준</label>
         <div class="slider-row">
-          <input type="range" min="30" max="730" value="180" step="10" id="uploadDaySlider"
-            oninput="document.getElementById('uploadDayVal').textContent=this.value+'일'" />
-          <div class="slider-val" id="uploadDayVal">180일</div>
+          <input type="range" min="1" max="60" value="6" step="1" id="uploadDaySlider"
+            oninput="document.getElementById('uploadDayVal').textContent=formatMonths(+this.value)" />
+          <div class="slider-val" id="uploadDayVal">6개월</div>
         </div>
         <div class="hint">이 기간 동안 새 영상을 올리지 않은 채널을 후보로 분류</div>
       </div>
       <div class="field" id="watchDaysField">
         <label>내 마지막 시청 기준</label>
         <div class="slider-row">
-          <input type="range" min="30" max="730" value="180" step="10" id="watchDaySlider"
-            oninput="document.getElementById('watchDayVal').textContent=this.value+'일'" />
-          <div class="slider-val" id="watchDayVal">180일</div>
+          <input type="range" min="1" max="60" value="6" step="1" id="watchDaySlider"
+            oninput="document.getElementById('watchDayVal').textContent=formatMonths(+this.value)" />
+          <div class="slider-val" id="watchDayVal">6개월</div>
         </div>
         <div class="hint">이 기간 동안 내가 한 번도 보지 않은 채널을 후보로 분류</div>
       </div>
@@ -254,13 +254,9 @@
     <div class="section">
       <div class="section-title">추가 설정</div>
       <div class="field">
-        <label>최대 스캔 채널 수</label>
-        <div class="slider-row">
-          <input type="range" min="10" max="500" value="100" step="10" id="limitSlider"
-            oninput="document.getElementById('limitVal').textContent=this.value+'개'" />
-          <div class="slider-val" id="limitVal">100개</div>
-        </div>
-        <div class="hint">API 쿼터 절약용. 일일 10,000 유닛 한도 — 채널당 약 200 유닛 소모</div>
+        <label>최대 스캔 채널 수 (전체 스캔: 0 또는 빈칸)</label>
+        <input type="text" id="limitInput" value="100" placeholder="0 = 전체" style="width:120px;" />
+        <div class="hint" style="margin-top:6px;">시청 기준 단독 모드는 채널 수 제한 없이 스캔해도 유닛 소모가 적습니다</div>
       </div>
       <div class="field">
         <label>화이트리스트 — 제외할 채널 (한 줄에 하나씩)</label>
@@ -352,8 +348,22 @@
 let accessToken = null;
 let scannedChannels = [];
 let selectedIds = new Set();
-let filterMode = 'both';       // 'upload' | 'watch' | 'both'
-let watchHistory = null;       // Map<channelId, Date> — Takeout 파싱 결과
+let filterMode = 'both';
+let watchHistory = null;
+
+/* 개월 수 → 표시 텍스트 */
+function formatMonths(m) {
+  if (m < 12) return m + '개월';
+  const years = Math.floor(m / 12);
+  const months = m % 12;
+  if (months === 0) return years + '년';
+  return years + '년 ' + months + '개월';
+}
+
+/* 개월 → 일수 (평균 30.44일) */
+function monthsToDays(m) {
+  return Math.round(m * 30.44);
+}
 
 /* ── 모드 선택 ── */
 function selectMode(mode) {
@@ -368,6 +378,8 @@ function selectMode(mode) {
 }
 // 초기 상태 적용
 selectMode('both');
+document.getElementById('uploadDayVal').textContent = formatMonths(parseInt(document.getElementById('uploadDaySlider').value));
+document.getElementById('watchDayVal').textContent  = formatMonths(parseInt(document.getElementById('watchDaySlider').value));
 
 /* ── Google Takeout JSON 파싱 ── */
 function handleDrop(e) {
@@ -481,9 +493,10 @@ async function startScan() {
     return;
   }
 
-  const uploadDays = parseInt(document.getElementById('uploadDaySlider').value);
-  const watchDays  = parseInt(document.getElementById('watchDaySlider').value);
-  const limit      = parseInt(document.getElementById('limitSlider').value);
+  const uploadDays = monthsToDays(parseInt(document.getElementById('uploadDaySlider').value));
+  const watchDays  = monthsToDays(parseInt(document.getElementById('watchDaySlider').value));
+  const limitRaw   = document.getElementById('limitInput').value.trim();
+  const limit      = (!limitRaw || limitRaw === '0') ? Infinity : parseInt(limitRaw);
   const wlRaw      = document.getElementById('whitelist').value;
   const whitelist  = wlRaw.split('\n').map(s => s.trim().toLowerCase()).filter(Boolean);
 
@@ -509,7 +522,10 @@ async function startScan() {
 
     const total = subs.length;
     document.getElementById('progressText').textContent = '0 / ' + total;
-    addLog('scanLog', `총 ${total}개 채널 스캔 시작 [모드: ${filterMode}]`, 'log-info');
+    const uploadMonths = parseInt(document.getElementById('uploadDaySlider').value);
+    const watchMonths  = parseInt(document.getElementById('watchDaySlider').value);
+    const modeLabel = filterMode === 'upload' ? `업로드 기준: ${formatMonths(uploadMonths)}` : filterMode === 'watch' ? `시청 기준: ${formatMonths(watchMonths)}` : `업로드: ${formatMonths(uploadMonths)} / 시청: ${formatMonths(watchMonths)}`;
+    addLog('scanLog', `총 ${total}개 채널 스캔 시작 [${modeLabel}]`, 'log-info');
 
     for (let i = 0; i < subs.length; i++) {
       const sub = subs[i];
