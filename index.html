@@ -510,10 +510,11 @@ function startAuth() {
 function checkTokenFromUrl() {
   const hash = window.location.hash;
   if (!hash) return;
-  const params = new URLSearchParams(hash.substring(1));
-  const token = params.get('access_token');
-  if (token) {
-    accessToken = token;
+  // URLSearchParams가 iss의 ://를 오파싱하는 경우를 피해 직접 파싱
+  const raw = hash.substring(1);
+  const tokenMatch = raw.match(/(?:^|&)access_token=([^&]+)/);
+  if (tokenMatch) {
+    accessToken = decodeURIComponent(tokenMatch[1]);
     history.replaceState(null, '', location.pathname);
     const savedId = sessionStorage.getItem('yt_client_id');
     if (savedId) document.getElementById('clientId').value = savedId;
