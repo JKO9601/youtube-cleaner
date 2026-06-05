@@ -76,12 +76,8 @@
   .alert { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 1rem; line-height: 1.7; }
   .alert-info { background: var(--info-bg); color: var(--info-text); }
   .alert-warn { background: var(--warn-bg); color: var(--warn-text); }
-  .alert-danger { background: var(--red-bg); color: var(--red-text); }
-  .alert-success { background: var(--green-bg); color: var(--green-text); }
   code { font-family: 'DM Mono', monospace; background: var(--bg2); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
   a { color: var(--info-text); }
-
-  /* 필터 모드 선택 */
   .mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .mode-card { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 10px; cursor: pointer; transition: all 0.15s; text-align: center; background: var(--bg); }
   .mode-card:hover { border-color: var(--border2); background: var(--bg2); }
@@ -89,17 +85,14 @@
   .mode-card .mode-icon { font-size: 20px; margin-bottom: 6px; }
   .mode-card .mode-name { font-size: 13px; font-weight: 500; }
   .mode-card .mode-desc { font-size: 11px; color: var(--hint); margin-top: 3px; line-height: 1.4; }
-
-  /* Takeout 업로드 영역 */
-  .upload-zone { border: 1.5px dashed var(--border2); border-radius: var(--radius); padding: 24px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--bg2); }
+  .upload-zone { border: 1.5px dashed var(--border2); border-radius: var(--radius); padding: 20px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--bg2); }
   .upload-zone:hover, .upload-zone.dragover { border-color: var(--yt); background: var(--red-bg); }
-  .upload-zone .uz-icon { font-size: 28px; margin-bottom: 8px; }
-  .upload-zone .uz-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .upload-zone .uz-icon { font-size: 24px; margin-bottom: 6px; }
+  .upload-zone .uz-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
   .upload-zone .uz-sub { font-size: 12px; color: var(--hint); }
   .upload-zone.loaded { border-color: var(--green-text); background: var(--green-bg); }
   .upload-zone.loaded .uz-sub { color: var(--green-text); }
-
-  /* 채널 리스트 */
+  .upload-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
   .channel-list { display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; padding-right: 2px; }
   .channel-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); transition: border-color 0.15s; }
   .channel-card.selected { border-color: var(--yt); background: var(--red-bg); }
@@ -113,10 +106,8 @@
   .badge-old { background: var(--red-bg); color: var(--red-text); }
   .badge-ok { background: var(--green-bg); color: var(--green-text); }
   .badge-wl { background: var(--bg3); color: var(--hint); }
-  .badge-warn { background: var(--warn-bg); color: var(--warn-text); }
   .ch-check { width: 22px; height: 22px; border-radius: 5px; border: 1.5px solid var(--border2); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; color: transparent; font-weight: 700; font-size: 13px; }
   .ch-check.checked { background: var(--yt); border-color: var(--yt); color: #fff; }
-
   .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1rem; }
   .summary-card { background: var(--bg2); border-radius: var(--radius); padding: 14px; text-align: center; }
   .summary-card .num { font-size: 26px; font-weight: 500; font-family: 'DM Mono', monospace; }
@@ -152,7 +143,7 @@
     <div class="step" id="s5">5 완료</div>
   </div>
 
-  <!-- STEP 1: 인증 -->
+  <!-- STEP 1 -->
   <div id="step1">
     <div class="section">
       <div class="section-title">Google OAuth 설정</div>
@@ -171,7 +162,7 @@
       <div style="font-size:13px;color:var(--muted);line-height:2.1;">
         1. <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a> → 새 프로젝트 생성<br>
         2. API 및 서비스 → 라이브러리 → <code>YouTube Data API v3</code> 사용 설정<br>
-        3. OAuth 동의 화면 → 외부 선택 → 앱 이름/이메일 입력<br>
+        3. OAuth 동의 화면 → 외부 선택 → 앱 이름/이메일 입력 → 앱 게시<br>
         4. 사용자 인증 정보 → + 만들기 → OAuth 2.0 클라이언트 ID → 웹 애플리케이션<br>
         5. 승인된 JavaScript 원본에 이 페이지 URL 추가<br>
         6. 생성된 클라이언트 ID를 위 입력란에 붙여넣기
@@ -183,9 +174,8 @@
     <div id="authStatus" style="margin-top:10px;font-size:13px;color:var(--muted);"></div>
   </div>
 
-  <!-- STEP 2: 설정 -->
+  <!-- STEP 2 -->
   <div id="step2" class="hidden">
-
     <!-- 필터 모드 -->
     <div class="section">
       <div class="section-title">필터 기준 선택</div>
@@ -198,7 +188,7 @@
         <div class="mode-card" id="mode-watch" onclick="selectMode('watch')">
           <div class="mode-icon">👁</div>
           <div class="mode-name">시청 기준</div>
-          <div class="mode-desc">내가 오래 안 본 채널<br>(Takeout 필요)</div>
+          <div class="mode-desc">내가 오래 안 본 채널</div>
         </div>
         <div class="mode-card selected" id="mode-both" onclick="selectMode('both')">
           <div class="mode-icon">🎯</div>
@@ -208,33 +198,52 @@
       </div>
     </div>
 
-    <!-- Takeout 업로드 (watch/both 모드에서만 표시) -->
-    <div class="section" id="takeoutSection">
-      <div class="section-title">Google Takeout — 시청 기록</div>
+    <!-- Takeout 파일 업로드 -->
+    <div class="section">
+      <div class="section-title">Google Takeout 파일</div>
       <div class="alert alert-warn" style="margin-bottom:12px;">
         <strong>Takeout 다운로드 방법</strong><br>
-        <a href="https://takeout.google.com" target="_blank">takeout.google.com</a> → YouTube 선택 → 기록 체크 → 내보내기<br>
-        압축 해제 후 <code>watch-history.json</code> 파일을 아래에 업로드하세요.
+        <a href="https://takeout.google.com" target="_blank">takeout.google.com</a> → YouTube 선택 → <b>기록 + 구독</b> 체크 → JSON 형식 → 내보내기<br>
+        압축 해제 후 아래 두 파일을 업로드하세요.
       </div>
-      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()"
-        ondragover="event.preventDefault();this.classList.add('dragover')"
-        ondragleave="this.classList.remove('dragover')"
-        ondrop="handleDrop(event)">
-        <div class="uz-icon">📂</div>
-        <div class="uz-title">watch-history.json 업로드</div>
-        <div class="uz-sub" id="uploadStatus">클릭하거나 파일을 끌어다 놓으세요</div>
+      <div class="upload-row">
+        <!-- 구독 CSV -->
+        <div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">구독 목록 (필수)</div>
+          <div class="upload-zone" id="csvZone" onclick="document.getElementById('csvInput').click()"
+            ondragover="event.preventDefault();this.classList.add('dragover')"
+            ondragleave="this.classList.remove('dragover')"
+            ondrop="handleCsvDrop(event)">
+            <div class="uz-icon">📋</div>
+            <div class="uz-title">subscriptions.csv</div>
+            <div class="uz-sub" id="csvStatus">클릭 또는 드래그</div>
+          </div>
+          <input type="file" id="csvInput" accept=".csv" class="hidden" onchange="handleCsvFile(this.files[0])" />
+        </div>
+        <!-- 시청 기록 JSON -->
+        <div id="watchUploadBox">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">시청 기록 (시청 기준 사용 시)</div>
+          <div class="upload-zone" id="watchZone" onclick="document.getElementById('watchInput').click()"
+            ondragover="event.preventDefault();this.classList.add('dragover')"
+            ondragleave="this.classList.remove('dragover')"
+            ondrop="handleWatchDrop(event)">
+            <div class="uz-icon">📂</div>
+            <div class="uz-title">watch-history.json</div>
+            <div class="uz-sub" id="watchStatus">클릭 또는 드래그</div>
+          </div>
+          <input type="file" id="watchInput" accept=".json" class="hidden" onchange="handleWatchFile(this.files[0])" />
+        </div>
       </div>
-      <input type="file" id="fileInput" accept=".json" class="hidden" onchange="handleFile(this.files[0])" />
     </div>
 
-    <!-- 일수 설정 -->
+    <!-- 기간 설정 -->
     <div class="section">
       <div class="section-title">기준 기간 설정</div>
       <div class="field" id="uploadDaysField">
         <label>채널 마지막 업로드 기준</label>
         <div class="slider-row">
           <input type="range" min="1" max="60" value="6" step="1" id="uploadDaySlider"
-            oninput="document.getElementById('uploadDayVal').textContent=formatMonths(+this.value)" />
+            oninput="document.getElementById('uploadDayVal').textContent=formatMonths(+this.value);updatePreview()" />
           <div class="slider-val" id="uploadDayVal">6개월</div>
         </div>
         <div class="hint">이 기간 동안 새 영상을 올리지 않은 채널을 후보로 분류</div>
@@ -243,21 +252,23 @@
         <label>내 마지막 시청 기준</label>
         <div class="slider-row">
           <input type="range" min="1" max="60" value="6" step="1" id="watchDaySlider"
-            oninput="document.getElementById('watchDayVal').textContent=formatMonths(+this.value)" />
+            oninput="document.getElementById('watchDayVal').textContent=formatMonths(+this.value);updatePreview()" />
           <div class="slider-val" id="watchDayVal">6개월</div>
         </div>
         <div class="hint">이 기간 동안 내가 한 번도 보지 않은 채널을 후보로 분류</div>
       </div>
     </div>
 
-    <!-- 기타 설정 -->
+    <!-- 분포 미리보기 -->
+    <div class="section hidden" id="previewPanel">
+      <div class="section-title">구간별 채널 분포 미리보기</div>
+      <div id="previewBody"></div>
+      <div style="margin-top:12px;padding:10px 14px;background:var(--red-bg);border-radius:var(--radius);font-size:13px;color:var(--red-text);" id="previewSummary"></div>
+    </div>
+
+    <!-- 추가 설정 -->
     <div class="section">
       <div class="section-title">추가 설정</div>
-      <div class="field">
-        <label>최대 스캔 채널 수 (전체 스캔: 0 또는 빈칸)</label>
-        <input type="text" id="limitInput" value="100" placeholder="0 = 전체" style="width:120px;" />
-        <div class="hint" style="margin-top:6px;">시청 기준 단독 모드는 채널 수 제한 없이 스캔해도 유닛 소모가 적습니다</div>
-      </div>
       <div class="field">
         <label>화이트리스트 — 제외할 채널 (한 줄에 하나씩)</label>
         <textarea id="whitelist" placeholder="MKBHD&#10;Linus Tech Tips&#10;UCxxxxxxxxxxxxxx"></textarea>
@@ -279,7 +290,7 @@
     </div>
   </div>
 
-  <!-- STEP 3: 스캔 -->
+  <!-- STEP 3 -->
   <div id="step3" class="hidden">
     <div class="section">
       <div class="section-title">스캔 진행 중</div>
@@ -290,7 +301,7 @@
     </div>
   </div>
 
-  <!-- STEP 4: 검토 -->
+  <!-- STEP 4 -->
   <div id="step4" class="hidden">
     <div class="summary-grid">
       <div class="summary-card">
@@ -318,10 +329,10 @@
     </div>
   </div>
 
-  <!-- STEP 5: 완료 -->
+  <!-- STEP 5 -->
   <div id="step5" class="hidden">
     <div class="section">
-      <div class="section-title">완료</div>
+      <div class="section-title">구독 취소 결과</div>
       <div class="summary-grid">
         <div class="summary-card danger">
           <div class="num" id="doneCount">-</div>
@@ -338,6 +349,38 @@
       </div>
       <div class="log" id="doneLog"></div>
     </div>
+
+    <!-- 남은 채널 현황 -->
+    <div class="section" style="margin-top:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div class="section-title" style="margin-bottom:0;">남은 구독 채널 현황</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="remainSearch" placeholder="채널명 검색..." style="font-size:12px;padding:5px 10px;width:140px;" oninput="filterRemainTable()" />
+          <select id="remainSort" onchange="filterRemainTable()" style="font-size:12px;padding:5px 8px;background:var(--bg2);color:var(--text);border:0.5px solid var(--border2);border-radius:var(--radius);font-family:'DM Sans',sans-serif;">
+            <option value="watch-asc">시청 오래된 순</option>
+            <option value="watch-desc">시청 최근 순</option>
+            <option value="upload-asc">업로드 오래된 순</option>
+            <option value="upload-desc">업로드 최근 순</option>
+            <option value="name">채널명 순</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--hint);margin-bottom:8px;" id="remainCount"></div>
+      <div style="overflow-x:auto;">
+        <table id="remainTable" style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border2);">
+              <th style="text-align:left;padding:8px 10px;font-weight:500;color:var(--muted);font-size:11px;white-space:nowrap;">채널명</th>
+              <th style="text-align:left;padding:8px 10px;font-weight:500;color:var(--muted);font-size:11px;white-space:nowrap;">마지막 업로드</th>
+              <th style="text-align:left;padding:8px 10px;font-weight:500;color:var(--muted);font-size:11px;white-space:nowrap;">마지막 시청</th>
+              <th style="text-align:left;padding:8px 10px;font-weight:500;color:var(--muted);font-size:11px;">상태</th>
+            </tr>
+          </thead>
+          <tbody id="remainTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="btn-row">
       <button class="btn" onclick="resetAll()">처음부터 다시</button>
     </div>
@@ -349,77 +392,95 @@ let accessToken = null;
 let scannedChannels = [];
 let selectedIds = new Set();
 let filterMode = 'both';
-let watchHistory = null;
+let watchHistory = null;   // Map<channelId, Date>
+let subsList = null;       // Array<{channelId, title}> — CSV 파싱 결과
 
-/* 개월 수 → 표시 텍스트 */
+/* ── 유틸 ── */
 function formatMonths(m) {
   if (m < 12) return m + '개월';
-  const years = Math.floor(m / 12);
-  const months = m % 12;
-  if (months === 0) return years + '년';
-  return years + '년 ' + months + '개월';
+  const y = Math.floor(m / 12), mo = m % 12;
+  return mo === 0 ? y + '년' : y + '년 ' + mo + '개월';
 }
-
-/* 개월 → 일수 (평균 30.44일) */
-function monthsToDays(m) {
-  return Math.round(m * 30.44);
-}
+function monthsToDays(m) { return Math.round(m * 30.44); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 /* ── 모드 선택 ── */
 function selectMode(mode) {
   filterMode = mode;
-  ['upload','watch','both'].forEach(m => {
-    document.getElementById('mode-'+m).classList.toggle('selected', m === mode);
-  });
-  const needTakeout = mode === 'watch' || mode === 'both';
-  document.getElementById('takeoutSection').classList.toggle('hidden', !needTakeout);
+  ['upload','watch','both'].forEach(m => document.getElementById('mode-'+m).classList.toggle('selected', m === mode));
   document.getElementById('uploadDaysField').classList.toggle('hidden', mode === 'watch');
   document.getElementById('watchDaysField').classList.toggle('hidden', mode === 'upload');
+  document.getElementById('watchUploadBox').classList.toggle('hidden', mode === 'upload');
+  updatePreview();
 }
-// 초기 상태 적용
 selectMode('both');
-document.getElementById('uploadDayVal').textContent = formatMonths(parseInt(document.getElementById('uploadDaySlider').value));
-document.getElementById('watchDayVal').textContent  = formatMonths(parseInt(document.getElementById('watchDaySlider').value));
+document.getElementById('uploadDayVal').textContent = formatMonths(+document.getElementById('uploadDaySlider').value);
+document.getElementById('watchDayVal').textContent  = formatMonths(+document.getElementById('watchDaySlider').value);
 
-/* ── Google Takeout JSON 파싱 ── */
-function handleDrop(e) {
+/* ── CSV 파싱 (subscriptions.csv) ── */
+function handleCsvDrop(e) {
   e.preventDefault();
-  document.getElementById('uploadZone').classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file) handleFile(file);
+  document.getElementById('csvZone').classList.remove('dragover');
+  handleCsvFile(e.dataTransfer.files[0]);
+}
+function handleCsvFile(file) {
+  if (!file) return;
+  document.getElementById('csvStatus').textContent = '파싱 중...';
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const lines = e.target.result.split('\n').filter(l => l.trim());
+      // 헤더 제거 (채널 ID,채널 URL,채널 제목)
+      const dataLines = lines[0].includes('채널 ID') || lines[0].toLowerCase().includes('channel id') ? lines.slice(1) : lines;
+      subsList = [];
+      for (const line of dataLines) {
+        const parts = line.split(',');
+        if (parts.length < 3) continue;
+        const channelId = parts[0].trim();
+        const title = parts.slice(2).join(',').trim().replace(/^"|"$/g, '');
+        if (channelId.startsWith('UC')) subsList.push({ channelId, title });
+      }
+      const zone = document.getElementById('csvZone');
+      zone.classList.add('loaded');
+      document.getElementById('csvStatus').textContent = `✓ ${subsList.length}개 채널 로드 완료`;
+      updatePreview();
+    } catch(err) {
+      document.getElementById('csvStatus').textContent = '⚠ 파싱 실패 — subscriptions.csv 파일인지 확인하세요.';
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
 }
 
-function handleFile(file) {
+/* ── 시청 기록 JSON 파싱 ── */
+function handleWatchDrop(e) {
+  e.preventDefault();
+  document.getElementById('watchZone').classList.remove('dragover');
+  handleWatchFile(e.dataTransfer.files[0]);
+}
+function handleWatchFile(file) {
   if (!file) return;
-  const status = document.getElementById('uploadStatus');
-  status.textContent = '파싱 중...';
+  document.getElementById('watchStatus').textContent = '파싱 중...';
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
       const data = JSON.parse(e.target.result);
-      // Takeout watch-history.json 구조: 배열, 각 항목에 titleUrl(채널 URL 포함) + time
-      // 채널 ID 추출: subtitles[0].url 또는 titleUrl 에서 channel ID
       watchHistory = new Map();
       let parsed = 0;
       for (const item of data) {
-        // 채널 ID는 subtitles 배열의 url에서 추출
         const chUrl = item.subtitles?.[0]?.url || '';
-        const chIdMatch = chUrl.match(/channel\/(UC[a-zA-Z0-9_-]{22})/);
-        if (!chIdMatch) continue;
-        const chId = chIdMatch[1];
-        const watchedAt = new Date(item.time);
-        if (isNaN(watchedAt.getTime())) continue;
-        // 채널별 가장 최근 시청일 유지
-        if (!watchHistory.has(chId) || watchHistory.get(chId) < watchedAt) {
-          watchHistory.set(chId, watchedAt);
-        }
+        const m = chUrl.match(/channel\/(UC[a-zA-Z0-9_-]{22})/);
+        if (!m) continue;
+        const chId = m[1];
+        const t = new Date(item.time);
+        if (isNaN(t.getTime())) continue;
+        if (!watchHistory.has(chId) || watchHistory.get(chId) < t) watchHistory.set(chId, t);
         parsed++;
       }
-      const zone = document.getElementById('uploadZone');
-      zone.classList.add('loaded');
-      status.textContent = `✓ ${parsed.toLocaleString()}개 시청 기록 로드 완료 (${watchHistory.size}개 채널)`;
+      document.getElementById('watchZone').classList.add('loaded');
+      document.getElementById('watchStatus').textContent = `✓ ${parsed.toLocaleString()}개 기록 (${watchHistory.size}개 채널)`;
+      updatePreview();
     } catch(err) {
-      document.getElementById('uploadStatus').textContent = '⚠ JSON 파싱 실패 — watch-history.json 파일인지 확인하세요.';
+      document.getElementById('watchStatus').textContent = '⚠ JSON 파싱 실패';
     }
   };
   reader.readAsText(file);
@@ -446,7 +507,6 @@ function startAuth() {
   sessionStorage.setItem('yt_client_id', clientId);
   window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
 }
-
 function checkTokenFromUrl() {
   const hash = window.location.hash;
   if (!hash) return;
@@ -487,51 +547,31 @@ function addLog(id, text, cls) {
 
 /* ── 스캔 ── */
 async function startScan() {
+  if (!subsList) { alert('subscriptions.csv 파일을 먼저 업로드하세요.'); return; }
   const needWatch = filterMode === 'watch' || filterMode === 'both';
-  if (needWatch && !watchHistory) {
-    alert('시청 기록 기준이 포함된 모드입니다.\nwatch-history.json 파일을 먼저 업로드하세요.');
-    return;
-  }
+  if (needWatch && !watchHistory) { alert('시청 기준이 포함된 모드입니다.\nwatch-history.json 파일을 먼저 업로드하세요.'); return; }
 
-  const uploadDays = monthsToDays(parseInt(document.getElementById('uploadDaySlider').value));
-  const watchDays  = monthsToDays(parseInt(document.getElementById('watchDaySlider').value));
-  const limitRaw   = document.getElementById('limitInput').value.trim();
-  const limit      = (!limitRaw || limitRaw === '0') ? Infinity : parseInt(limitRaw);
-  const wlRaw      = document.getElementById('whitelist').value;
-  const whitelist  = wlRaw.split('\n').map(s => s.trim().toLowerCase()).filter(Boolean);
-
+  const uploadDays  = monthsToDays(+document.getElementById('uploadDaySlider').value);
+  const watchDays   = monthsToDays(+document.getElementById('watchDaySlider').value);
+  const wlRaw       = document.getElementById('whitelist').value;
+  const whitelist   = wlRaw.split('\n').map(s => s.trim().toLowerCase()).filter(Boolean);
   const uploadCutoff = Date.now() - uploadDays * 86400000;
   const watchCutoff  = Date.now() - watchDays  * 86400000;
 
   goToStep(3);
   scannedChannels = [];
   document.getElementById('scanLog').innerHTML = '';
-  document.getElementById('scanStatus').textContent = '구독 채널 목록 불러오는 중...';
+
+  const total = subsList.length;
+  document.getElementById('progressText').textContent = '0 / ' + total;
+  const uploadMonths = +document.getElementById('uploadDaySlider').value;
+  const watchMonths  = +document.getElementById('watchDaySlider').value;
+  const modeLabel = filterMode === 'upload' ? `업로드: ${formatMonths(uploadMonths)}` : filterMode === 'watch' ? `시청: ${formatMonths(watchMonths)}` : `업로드: ${formatMonths(uploadMonths)} / 시청: ${formatMonths(watchMonths)}`;
+  addLog('scanLog', `총 ${total}개 채널 스캔 시작 [${modeLabel}]`, 'log-info');
 
   try {
-    let subs = [];
-    let pageToken = '';
-    do {
-      const url = `https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&mine=true&maxResults=50${pageToken ? '&pageToken=' + pageToken : ''}&order=alphabetical`;
-      const data = await ytGet(url);
-      subs = subs.concat(data.items || []);
-      pageToken = data.nextPageToken || '';
-      if (subs.length >= limit) break;
-    } while (pageToken);
-    subs = subs.slice(0, limit);
-
-    const total = subs.length;
-    document.getElementById('progressText').textContent = '0 / ' + total;
-    const uploadMonths = parseInt(document.getElementById('uploadDaySlider').value);
-    const watchMonths  = parseInt(document.getElementById('watchDaySlider').value);
-    const modeLabel = filterMode === 'upload' ? `업로드 기준: ${formatMonths(uploadMonths)}` : filterMode === 'watch' ? `시청 기준: ${formatMonths(watchMonths)}` : `업로드: ${formatMonths(uploadMonths)} / 시청: ${formatMonths(watchMonths)}`;
-    addLog('scanLog', `총 ${total}개 채널 스캔 시작 [${modeLabel}]`, 'log-info');
-
-    for (let i = 0; i < subs.length; i++) {
-      const sub = subs[i];
-      const channelId = sub.snippet.resourceId.channelId;
-      const title = sub.snippet.title;
-      const thumb = sub.snippet?.thumbnails?.default?.url || '';
+    for (let i = 0; i < subsList.length; i++) {
+      const { channelId, title } = subsList[i];
 
       document.getElementById('scanStatus').textContent = `스캔 중 (${i+1}/${total}): ${title}`;
       document.getElementById('progressFill').style.width = Math.round((i+1)/total*100) + '%';
@@ -558,46 +598,35 @@ async function startScan() {
       }
 
       // 시청 기준
-      let lastWatch = null, lastWatchStr = '기록 없음', watchDiffDays = null;
+      let lastWatch = null, lastWatchStr = '시청 기록 없음', watchDiffDays = null;
       if (filterMode !== 'upload' && watchHistory) {
         lastWatch = watchHistory.get(channelId) || null;
         if (lastWatch) {
           watchDiffDays = Math.floor((Date.now() - lastWatch.getTime()) / 86400000);
           lastWatchStr = `${watchDiffDays}일 전`;
-        } else {
-          lastWatchStr = '시청 기록 없음';
         }
       }
 
       // 후보 판정
-      const uploadOld = filterMode !== 'watch'
-        ? (lastUpload ? lastUpload.getTime() < uploadCutoff : true)
-        : true;
-      const watchOld = filterMode !== 'upload'
-        ? (lastWatch ? lastWatch.getTime() < watchCutoff : true)
-        : true;
-
+      const uploadOld = filterMode !== 'watch' ? (lastUpload ? lastUpload.getTime() < uploadCutoff : true) : true;
+      const watchOld  = filterMode !== 'upload' ? (lastWatch ? lastWatch.getTime() < watchCutoff : true) : true;
       let isCandidate;
       if (filterMode === 'upload') isCandidate = uploadOld;
       else if (filterMode === 'watch') isCandidate = watchOld;
-      else isCandidate = uploadOld && watchOld; // both = AND
+      else isCandidate = uploadOld && watchOld;
 
       const logParts = [];
       if (filterMode !== 'watch') logParts.push(`업로드: ${lastUploadStr}`);
       if (filterMode !== 'upload') logParts.push(`시청: ${lastWatchStr}`);
 
-      const prefix = isCandidate && !isWL ? '⚠' : isWL ? '🔒' : '✓';
-      const logCls = isCandidate && !isWL ? 'log-err' : 'log-ok';
-      addLog('scanLog', `${prefix} ${title} — ${logParts.join(' / ')}${isWL ? ' [화이트리스트]' : ''}`, logCls);
+      addLog('scanLog',
+        `${isCandidate && !isWL ? '⚠' : isWL ? '🔒' : '✓'} ${title} — ${logParts.join(' / ')}${isWL ? ' [화이트리스트]' : ''}`,
+        isCandidate && !isWL ? 'log-err' : 'log-ok'
+      );
 
-      scannedChannels.push({
-        subscriptionId: sub.id, channelId, title, thumb,
-        lastUpload, lastUploadStr, uploadDiffDays,
-        lastWatch, lastWatchStr, watchDiffDays,
-        isCandidate, isWL
-      });
-
-      await new Promise(r => setTimeout(r, 80));
+      // subscriptionId는 저장하지 않고 취소 시점에 조회
+      scannedChannels.push({ channelId, title, lastUpload, lastUploadStr, uploadDiffDays, lastWatch, lastWatchStr, watchDiffDays, isCandidate, isWL });
+      await new Promise(r => setTimeout(r, filterMode !== 'watch' ? 80 : 10));
     }
 
     const preview = document.getElementById('previewToggle').checked;
@@ -612,7 +641,7 @@ async function startScan() {
   }
 }
 
-/* ── 검토 빌드 ── */
+/* ── 검토 ── */
 function buildReviewStep() {
   const candidates = scannedChannels.filter(c => c.isCandidate && !c.isWL);
   document.getElementById('totalCount').textContent = scannedChannels.length;
@@ -629,50 +658,39 @@ function renderChannelList() {
   toShow.sort((a, b) => {
     if (a.isCandidate && !a.isWL && !(b.isCandidate && !b.isWL)) return -1;
     if (!(a.isCandidate && !a.isWL) && b.isCandidate && !b.isWL) return 1;
-    const aMax = Math.max(a.uploadDiffDays||0, a.watchDiffDays||0);
-    const bMax = Math.max(b.uploadDiffDays||0, b.watchDiffDays||0);
-    return bMax - aMax;
+    return (Math.max(b.uploadDiffDays||0, b.watchDiffDays||0)) - (Math.max(a.uploadDiffDays||0, a.watchDiffDays||0));
   });
-
   if (toShow.length === 0) {
-    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--hint);font-size:13px;">후보 채널이 없습니다. 기준 일수를 줄여보세요.</div>';
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--hint);font-size:13px;">후보 채널이 없습니다. 기준 기간을 줄여보세요.</div>';
     return;
   }
-
   toShow.forEach(c => {
     const card = document.createElement('div');
-    const isSelected = selectedIds.has(c.channelId);
-    card.className = 'channel-card' + (isSelected ? ' selected' : '') + (c.isWL ? ' whitelisted' : '');
-
-    const initials = c.title.replace(/[^a-zA-Z가-힣]/g, '').charAt(0).toUpperCase() || '?';
-    const badgeClass = c.isWL ? 'badge-wl' : c.isCandidate ? 'badge-old' : 'badge-ok';
-    const badgeText  = c.isWL ? '보호됨' : c.isCandidate ? '후보' : '활성';
-
-    const metaLines = [];
-    if (filterMode !== 'watch')  metaLines.push(`업로드: ${c.lastUploadStr}`);
-    if (filterMode !== 'upload') metaLines.push(`시청: ${c.lastWatchStr}`);
-
+    const isSel = selectedIds.has(c.channelId);
+    card.className = 'channel-card' + (isSel ? ' selected' : '') + (c.isWL ? ' whitelisted' : '');
+    const init = c.title.replace(/[^a-zA-Z가-힣]/g,'').charAt(0).toUpperCase() || '?';
+    const badgeCls = c.isWL ? 'badge-wl' : c.isCandidate ? 'badge-old' : 'badge-ok';
+    const badgeTxt = c.isWL ? '보호됨' : c.isCandidate ? '후보' : '활성';
+    const meta = [];
+    if (filterMode !== 'watch') meta.push(`업로드: ${c.lastUploadStr}`);
+    if (filterMode !== 'upload') meta.push(`시청: ${c.lastWatchStr}`);
     card.innerHTML = `
-      <div class="ch-avatar">${c.thumb ? `<img src="${escHtml(c.thumb)}" onerror="this.parentNode.textContent='${initials}'" />` : initials}</div>
+      <div class="ch-avatar">${init}</div>
       <div class="ch-info">
         <div class="ch-name">${escHtml(c.title)}</div>
-        <div class="ch-meta">${metaLines.join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>
+        <div class="ch-meta">${meta.join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>
       </div>
-      <div class="badge ${badgeClass}">${badgeText}</div>
-      ${!c.isWL ? `<div class="ch-check${isSelected ? ' checked' : ''}" onclick="toggleSelect('${c.channelId}',this)">✓</div>` : '<div style="width:22px"></div>'}
+      <div class="badge ${badgeCls}">${badgeTxt}</div>
+      ${!c.isWL ? `<div class="ch-check${isSel?' checked':''}" onclick="toggleSelect('${c.channelId}',this)">✓</div>` : '<div style="width:22px"></div>'}
     `;
     list.appendChild(card);
   });
   updateSelectedInfo();
 }
 
-function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
 function toggleSelect(id, el) {
-  if (selectedIds.has(id)) selectedIds.delete(id);
-  else selectedIds.add(id);
-  const card = el.closest('.channel-card');
-  card.classList.toggle('selected', selectedIds.has(id));
+  if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+  el.closest('.channel-card').classList.toggle('selected', selectedIds.has(id));
   el.classList.toggle('checked', selectedIds.has(id));
   updateSelectedInfo();
 }
@@ -682,34 +700,200 @@ function deselectAll() { selectedIds.clear(); renderChannelList(); }
 
 async function confirmUnsub() {
   if (selectedIds.size === 0) { alert('선택된 채널이 없습니다.'); return; }
-  const ok = confirm(`${selectedIds.size}개 채널을 구독 취소합니다.\n이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?`);
-  if (!ok) return;
+  if (!confirm(`${selectedIds.size}개 채널을 구독 취소합니다.\n이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?`)) return;
   await executeUnsub();
 }
 
+/* ── 구독 취소 — subscriptionId를 취소 시점에 API로 조회 ── */
 async function executeUnsub() {
   goToStep(5);
   document.getElementById('doneLog').innerHTML = '';
   let done = 0, err = 0;
   const targets = scannedChannels.filter(c => selectedIds.has(c.channelId));
+
   for (const ch of targets) {
     try {
-      const ok = await ytDelete(`https://www.googleapis.com/youtube/v3/subscriptions?id=${ch.subscriptionId}`);
+      // subscriptionId 조회
+      const data = await ytGet(`https://www.googleapis.com/youtube/v3/subscriptions?part=id&mine=true&forChannelId=${ch.channelId}`);
+      const subId = data.items?.[0]?.id;
+      if (!subId) { err++; addLog('doneLog', '✗ 구독 ID 없음: ' + ch.title, 'log-err'); continue; }
+
+      const ok = await ytDelete(`https://www.googleapis.com/youtube/v3/subscriptions?id=${subId}`);
       if (ok) { done++; addLog('doneLog', '✓ 구독 취소: ' + ch.title, 'log-ok'); }
       else { err++; addLog('doneLog', '✗ 실패: ' + ch.title, 'log-err'); }
     } catch(e) { err++; addLog('doneLog', '✗ 오류: ' + ch.title + ' — ' + e.message, 'log-err'); }
-    await new Promise(r => setTimeout(r, 350));
+    await new Promise(r => setTimeout(r, 400));
   }
+
   document.getElementById('doneCount').textContent = done;
   document.getElementById('errCount').textContent = err;
+  buildRemainTable();
+
+/* ── 분포 미리보기 ── */
+// 시청 기록 기반 구간: 구독 채널 기준으로 마지막 시청일 분포 계산
+// 업로드 기준은 API 필요하므로 시청 기록만 로컬 계산
+function updatePreview() {
+  if (!subsList) return;
+  const panel = document.getElementById('previewPanel');
+  panel.classList.remove('hidden');
+
+  const watchMonths = +document.getElementById('watchDaySlider').value;
+  const watchCutoffDays = monthsToDays(watchMonths);
+  const buckets = [1, 2, 3, 6, 12, 24, 60]; // 개월 단위 구간 상한
+
+  const body = document.getElementById('previewBody');
+  body.innerHTML = '';
+
+  const total = subsList.length;
+
+  // 시청 기록 분포 (watchHistory 있을 때만)
+  if (watchHistory && (filterMode === 'watch' || filterMode === 'both')) {
+    const watchDist = computeDist(subsList, buckets, ch => {
+      const d = watchHistory.get(ch.channelId);
+      return d ? Math.floor((Date.now() - d.getTime()) / 86400000) : null;
+    });
+    body.appendChild(renderDistTable('내 시청 기준 분포', watchDist, buckets, total, watchCutoffDays));
+  }
+
+  // 구독 취소 후보 수 계산 (시청 기준만, API 없이)
+  let candidateCount = 0;
+  if (watchHistory && filterMode !== 'upload') {
+    const cutoff = Date.now() - watchCutoffDays * 86400000;
+    candidateCount = subsList.filter(ch => {
+      const d = watchHistory.get(ch.channelId);
+      return !d || d.getTime() < cutoff;
+    }).length;
+    document.getElementById('previewSummary').textContent =
+      `현재 기준(${formatMonths(watchMonths)} 미시청)으로 취소 후보 약 ${candidateCount}개 / 전체 ${total}개`;
+    document.getElementById('previewSummary').classList.remove('hidden');
+  } else {
+    document.getElementById('previewSummary').classList.add('hidden');
+  }
+}
+
+function computeDist(subs, buckets, getDays) {
+  // 구간: ~1개월, ~2개월, ..., ~24개월, 24개월 초과, 기록없음
+  const counts = new Array(buckets.length + 2).fill(0); // +1 초과, +1 기록없음
+  for (const ch of subs) {
+    const days = getDays(ch);
+    if (days === null) { counts[counts.length - 1]++; continue; }
+    const months = days / 30.44;
+    let placed = false;
+    for (let i = 0; i < buckets.length; i++) {
+      if (months <= buckets[i]) { counts[i]++; placed = true; break; }
+    }
+    if (!placed) counts[counts.length - 2]++;
+  }
+  return counts;
+}
+
+function renderDistTable(title, counts, buckets, total, cutoffDays) {
+  const cutoffMonths = cutoffDays / 30.44;
+  const wrap = document.createElement('div');
+  wrap.style.marginBottom = '14px';
+
+  const lbl = document.createElement('div');
+  lbl.style.cssText = 'font-size:12px;font-weight:500;color:var(--muted);margin-bottom:8px;';
+  lbl.textContent = title;
+  wrap.appendChild(lbl);
+
+  const labels = buckets.map((b, i) => {
+    const prev = i === 0 ? 0 : buckets[i-1];
+    return prev === 0 ? `${formatMonths(b)} 이내` : `${formatMonths(prev)}~${formatMonths(b)}`;
+  });
+  labels.push(`${formatMonths(buckets[buckets.length-1])} 초과`);
+  labels.push('시청 기록 없음');
+
+  const maxCount = Math.max(...counts, 1);
+
+  counts.forEach((cnt, i) => {
+    const months = i < buckets.length ? buckets[i] : (i === buckets.length ? 999 : 9999);
+    const isOver = months * 30.44 > cutoffDays || i >= buckets.length;
+    const pct = Math.round(cnt / total * 100);
+    const barW = Math.round(cnt / maxCount * 100);
+
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:5px;';
+    row.innerHTML = `
+      <div style="width:110px;font-size:12px;font-family:'DM Mono',monospace;color:${isOver?'var(--red-text)':'var(--muted)'};flex-shrink:0;">${labels[i]}</div>
+      <div style="flex:1;background:var(--bg3);border-radius:3px;height:16px;overflow:hidden;">
+        <div style="height:100%;width:${barW}%;background:${isOver?'var(--red-text)':'var(--green-text)'};border-radius:3px;transition:width 0.3s;"></div>
+      </div>
+      <div style="width:70px;font-size:12px;font-family:'DM Mono',monospace;text-align:right;color:${isOver?'var(--red-text)':'var(--muted)'};">${cnt}개 (${pct}%)</div>
+    `;
+    wrap.appendChild(row);
+  });
+
+  return wrap;
+}
+
+
+let remainData = [];
+
+function buildRemainTable() {
+  // 취소된 채널 제외한 나머지
+  const cancelledIds = new Set(
+    scannedChannels.filter(c => selectedIds.has(c.channelId)).map(c => c.channelId)
+  );
+  remainData = scannedChannels.filter(c => !cancelledIds.has(c.channelId));
+  document.getElementById('remainCount').textContent = `총 ${remainData.length}개 채널`;
+  filterRemainTable();
+}
+
+function filterRemainTable() {
+  const q = (document.getElementById('remainSearch')?.value || '').toLowerCase();
+  const sort = document.getElementById('remainSort')?.value || 'watch-asc';
+  let rows = remainData.filter(c => c.title.toLowerCase().includes(q));
+
+  rows.sort((a, b) => {
+    if (sort === 'watch-asc')   return (a.watchDiffDays ?? 99999) - (b.watchDiffDays ?? 99999);
+    if (sort === 'watch-desc')  return (b.watchDiffDays ?? 99999) - (a.watchDiffDays ?? 99999);
+    if (sort === 'upload-asc')  return (a.uploadDiffDays ?? 99999) - (b.uploadDiffDays ?? 99999);
+    if (sort === 'upload-desc') return (b.uploadDiffDays ?? 99999) - (a.uploadDiffDays ?? 99999);
+    if (sort === 'name')        return a.title.localeCompare(b.title, 'ko');
+    return 0;
+  });
+
+  const tbody = document.getElementById('remainTableBody');
+  tbody.innerHTML = '';
+
+  const now = Date.now();
+  const warnCutoff = 90 * 86400000;  // 90일 이상이면 주의 표시
+
+  rows.forEach(c => {
+    const uploadStr = c.lastUploadStr || '알 수 없음';
+    const watchStr  = c.lastWatchStr  || '시청 기록 없음';
+
+    const uploadWarn = c.uploadDiffDays !== null && c.uploadDiffDays > 90;
+    const watchWarn  = c.watchDiffDays  !== null ? c.watchDiffDays > 90 : true;
+
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '0.5px solid var(--border)';
+    tr.innerHTML = `
+      <td style="padding:9px 10px;font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(c.title)}">${escHtml(c.title)}</td>
+      <td style="padding:9px 10px;font-family:'DM Mono',monospace;font-size:12px;color:${uploadWarn ? 'var(--warn-text)' : 'var(--muted)'};">${escHtml(uploadStr)}</td>
+      <td style="padding:9px 10px;font-family:'DM Mono',monospace;font-size:12px;color:${watchWarn ? 'var(--red-text)' : 'var(--muted)'};">${escHtml(watchStr)}</td>
+      <td style="padding:9px 10px;">
+        ${c.isCandidate
+          ? `<span class="badge badge-old">재검토 필요</span>`
+          : `<span class="badge badge-ok">양호</span>`}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (rows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--hint);font-size:13px;">검색 결과가 없습니다.</td></tr>';
+  }
 }
 
 function resetAll() {
-  accessToken = null; scannedChannels = []; selectedIds.clear(); watchHistory = null;
+  accessToken = null; scannedChannels = []; selectedIds.clear(); watchHistory = null; subsList = null;
   document.getElementById('scanLog').innerHTML = '';
   document.getElementById('channelList').innerHTML = '';
-  document.getElementById('uploadZone').classList.remove('loaded');
-  document.getElementById('uploadStatus').textContent = '클릭하거나 파일을 끌어다 놓으세요';
+  ['csvZone','watchZone'].forEach(id => document.getElementById(id).classList.remove('loaded'));
+  document.getElementById('csvStatus').textContent = '클릭 또는 드래그';
+  document.getElementById('watchStatus').textContent = '클릭 또는 드래그';
   goToStep(1);
 }
 
