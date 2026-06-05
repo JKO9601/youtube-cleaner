@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>YouTube Subscription Cleaner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --yt: #FF0000;
+    --bg: #ffffff; --bg2: #f5f5f5; --bg3: #ebebeb;
+    --text: #111; --muted: #555; --hint: #888;
+    --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.2);
+    --red-bg: #fff0f0; --red-text: #b91c1c;
+    --green-bg: #f0fff4; --green-text: #166534;
+    --info-bg: #eff6ff; --info-text: #1d4ed8;
+    --warn-bg: #fffbeb; --warn-text: #92400e;
+    --radius: 8px; --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a; --bg2: #242424; --bg3: #2e2e2e;
+      --text: #f0f0f0; --muted: #aaa; --hint: #666;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+      --red-bg: #2a1010; --red-text: #f87171;
+      --green-bg: #0d2318; --green-text: #86efac;
+      --info-bg: #0d1f3a; --info-text: #93c5fd;
+      --warn-bg: #2a1f00; --warn-text: #fcd34d;
+    }
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1rem; }
+  .header { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
+  .header .logo { width: 36px; height: 25px; background: var(--yt); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .header .logo::after { content: ''; border-left: 11px solid #fff; border-top: 7px solid transparent; border-bottom: 7px solid transparent; margin-left: 2px; }
+  .header h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.02em; }
+  .step-bar { display: flex; margin-bottom: 1.5rem; border-radius: var(--radius); overflow: hidden; border: 0.5px solid var(--border); }
+  .step { flex: 1; padding: 10px 4px; text-align: center; font-size: 12px; font-weight: 500; color: var(--hint); background: var(--bg); border-bottom: 3px solid transparent; transition: all 0.2s; }
+  .step + .step { border-left: 0.5px solid var(--border); }
+  .step.active { color: var(--yt); border-color: var(--yt); background: var(--bg2); }
+  .step.done { color: var(--green-text); border-color: var(--green-text); }
+  .section { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+  .section-title { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--hint); margin-bottom: 1rem; }
+  .field { margin-bottom: 1rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
+  .field input[type=text], .field textarea {
+    width: 100%; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    background: var(--bg2); color: var(--text); border: 0.5px solid var(--border2);
+    border-radius: var(--radius); padding: 9px 12px; outline: none; transition: border-color 0.15s;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--yt); }
+  .field textarea { resize: vertical; min-height: 72px; font-size: 13px; line-height: 1.6; }
+  .field .hint { font-size: 12px; color: var(--hint); margin-top: 5px; font-family: 'DM Mono', monospace; }
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  .slider-row input[type=range] { flex: 1; accent-color: var(--yt); }
+  .slider-val { font-size: 15px; font-weight: 500; font-family: 'DM Mono', monospace; min-width: 70px; text-align: right; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+  .toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: var(--border2); border-radius: 12px; cursor: pointer; transition: background 0.2s; }
+  .toggle input:checked + .toggle-slider { background: var(--yt); }
+  .toggle-slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border2); background: var(--bg); color: var(--text); transition: opacity 0.15s, transform 0.1s, background 0.15s; }
+  .btn:active { transform: scale(0.98); }
+  .btn:hover { background: var(--bg2); }
+  .btn-primary { background: var(--yt); color: #fff; border-color: var(--yt); }
+  .btn-primary:hover { opacity: 0.85; background: var(--yt); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-danger { background: var(--red-bg); color: var(--red-text); border-color: var(--red-text); }
+  .btn-danger:hover { opacity: 0.85; background: var(--red-bg); }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
+  .alert { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 1rem; line-height: 1.7; }
+  .alert-info { background: var(--info-bg); color: var(--info-text); }
+  .alert-warn { background: var(--warn-bg); color: var(--warn-text); }
+  .alert-danger { background: var(--red-bg); color: var(--red-text); }
+  .alert-success { background: var(--green-bg); color: var(--green-text); }
+  code { font-family: 'DM Mono', monospace; background: var(--bg2); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+  a { color: var(--info-text); }
+
+  /* 필터 모드 선택 */
+  .mode-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .mode-card { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 10px; cursor: pointer; transition: all 0.15s; text-align: center; background: var(--bg); }
+  .mode-card:hover { border-color: var(--border2); background: var(--bg2); }
+  .mode-card.selected { border-color: var(--yt); background: var(--red-bg); }
+  .mode-card .mode-icon { font-size: 20px; margin-bottom: 6px; }
+  .mode-card .mode-name { font-size: 13px; font-weight: 500; }
+  .mode-card .mode-desc { font-size: 11px; color: var(--hint); margin-top: 3px; line-height: 1.4; }
+
+  /* Takeout 업로드 영역 */
+  .upload-zone { border: 1.5px dashed var(--border2); border-radius: var(--radius); padding: 24px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--bg2); }
+  .upload-zone:hover, .upload-zone.dragover { border-color: var(--yt); background: var(--red-bg); }
+  .upload-zone .uz-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-zone .uz-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .upload-zone .uz-sub { font-size: 12px; color: var(--hint); }
+  .upload-zone.loaded { border-color: var(--green-text); background: var(--green-bg); }
+  .upload-zone.loaded .uz-sub { color: var(--green-text); }
+
+  /* 채널 리스트 */
+  .channel-list { display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; padding-right: 2px; }
+  .channel-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); transition: border-color 0.15s; }
+  .channel-card.selected { border-color: var(--yt); background: var(--red-bg); }
+  .channel-card.whitelisted { opacity: 0.5; }
+  .ch-avatar { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; color: var(--muted); overflow: hidden; }
+  .ch-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .ch-info { flex: 1; min-width: 0; }
+  .ch-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ch-meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 3px; line-height: 1.6; }
+  .badge { font-size: 11px; padding: 3px 8px; border-radius: 99px; font-weight: 500; white-space: nowrap; }
+  .badge-old { background: var(--red-bg); color: var(--red-text); }
+  .badge-ok { background: var(--green-bg); color: var(--green-text); }
+  .badge-wl { background: var(--bg3); color: var(--hint); }
+  .badge-warn { background: var(--warn-bg); color: var(--warn-text); }
+  .ch-check { width: 22px; height: 22px; border-radius: 5px; border: 1.5px solid var(--border2); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; color: transparent; font-weight: 700; font-size: 13px; }
+  .ch-check.checked { background: var(--yt); border-color: var(--yt); color: #fff; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .summary-card { background: var(--bg2); border-radius: var(--radius); padding: 14px; text-align: center; }
+  .summary-card .num { font-size: 26px; font-weight: 500; font-family: 'DM Mono', monospace; }
+  .summary-card .lbl { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .summary-card.danger .num { color: var(--red-text); }
+  .progress-bar { height: 4px; background: var(--bg2); border-radius: 2px; overflow: hidden; margin: 8px 0; }
+  .progress-fill { height: 100%; background: var(--yt); border-radius: 2px; transition: width 0.3s; }
+  .log { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); background: var(--bg2); border-radius: var(--radius); padding: 10px 12px; max-height: 200px; overflow-y: auto; line-height: 1.9; }
+  .log-ok { color: var(--green-text); }
+  .log-err { color: var(--red-text); }
+  .log-info { color: var(--info-text); }
+  .select-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  .select-bar span { font-size: 13px; color: var(--muted); flex: 1; }
+  .link-btn { background: none; border: none; font-size: 13px; color: var(--info-text); cursor: pointer; text-decoration: underline; font-family: 'DM Sans', sans-serif; padding: 0; }
+  .hidden { display: none !important; }
+  .channel-list::-webkit-scrollbar, .log::-webkit-scrollbar { width: 4px; }
+  .channel-list::-webkit-scrollbar-track, .log::-webkit-scrollbar-track { background: transparent; }
+  .channel-list::-webkit-scrollbar-thumb, .log::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo"></div>
+    <h1>YouTube Subscription Cleaner</h1>
+  </div>
+
+  <div class="step-bar">
+    <div class="step active" id="s1">1 인증</div>
+    <div class="step" id="s2">2 설정</div>
+    <div class="step" id="s3">3 스캔</div>
+    <div class="step" id="s4">4 검토</div>
+    <div class="step" id="s5">5 완료</div>
+  </div>
+
+  <!-- STEP 1: 인증 -->
+  <div id="step1">
+    <div class="section">
+      <div class="section-title">Google OAuth 설정</div>
+      <div class="alert alert-info">
+        각자 자신의 Google Cloud 프로젝트 Client ID를 사용합니다.<br>
+        내 구독 데이터는 브라우저 안에서만 처리되며 외부 서버로 전송되지 않습니다.
+      </div>
+      <div class="field">
+        <label>OAuth Client ID</label>
+        <input type="text" id="clientId" placeholder="xxxxxxxxxxxx.apps.googleusercontent.com" />
+        <div class="hint">Google Cloud Console → 사용자 인증 정보 → OAuth 2.0 클라이언트 ID</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">처음 사용 시 설정 방법 (1회만)</div>
+      <div style="font-size:13px;color:var(--muted);line-height:2.1;">
+        1. <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a> → 새 프로젝트 생성<br>
+        2. API 및 서비스 → 라이브러리 → <code>YouTube Data API v3</code> 사용 설정<br>
+        3. OAuth 동의 화면 → 외부 선택 → 앱 이름/이메일 입력<br>
+        4. 사용자 인증 정보 → + 만들기 → OAuth 2.0 클라이언트 ID → 웹 애플리케이션<br>
+        5. 승인된 JavaScript 원본에 이 페이지 URL 추가<br>
+        6. 생성된 클라이언트 ID를 위 입력란에 붙여넣기
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-primary" onclick="startAuth()">Google 계정으로 로그인</button>
+    </div>
+    <div id="authStatus" style="margin-top:10px;font-size:13px;color:var(--muted);"></div>
+  </div>
+
+  <!-- STEP 2: 설정 -->
+  <div id="step2" class="hidden">
+
+    <!-- 필터 모드 -->
+    <div class="section">
+      <div class="section-title">필터 기준 선택</div>
+      <div class="mode-grid">
+        <div class="mode-card" id="mode-upload" onclick="selectMode('upload')">
+          <div class="mode-icon">📤</div>
+          <div class="mode-name">업로드 기준</div>
+          <div class="mode-desc">채널이 오래 영상을 안 올린 경우</div>
+        </div>
+        <div class="mode-card" id="mode-watch" onclick="selectMode('watch')">
+          <div class="mode-icon">👁</div>
+          <div class="mode-name">시청 기준</div>
+          <div class="mode-desc">내가 오래 안 본 채널<br>(Takeout 필요)</div>
+        </div>
+        <div class="mode-card selected" id="mode-both" onclick="selectMode('both')">
+          <div class="mode-icon">🎯</div>
+          <div class="mode-name">둘 다 (AND)</div>
+          <div class="mode-desc">업로드도 없고<br>내가 본 적도 없는</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Takeout 업로드 (watch/both 모드에서만 표시) -->
+    <div class="section" id="takeoutSection">
+      <div class="section-title">Google Takeout — 시청 기록</div>
+      <div class="alert alert-warn" style="margin-bottom:12px;">
+        <strong>Takeout 다운로드 방법</strong><br>
+        <a href="https://takeout.google.com" target="_blank">takeout.google.com</a> → YouTube 선택 → 기록 체크 → 내보내기<br>
+        압축 해제 후 <code>watch-history.json</code> 파일을 아래에 업로드하세요.
+      </div>
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()"
+        ondragover="event.preventDefault();this.classList.add('dragover')"
+        ondragleave="this.classList.remove('dragover')"
+        ondrop="handleDrop(event)">
+        <div class="uz-icon">📂</div>
+        <div class="uz-title">watch-history.json 업로드</div>
+        <div class="uz-sub" id="uploadStatus">클릭하거나 파일을 끌어다 놓으세요</div>
+      </div>
+      <input type="file" id="fileInput" accept=".json" class="hidden" onchange="handleFile(this.files[0])" />
+    </div>
+
+    <!-- 일수 설정 -->
+    <div class="section">
+      <div class="section-title">기준 일수 설정</div>
+      <div class="field" id="uploadDaysField">
+        <label>채널 마지막 업로드 기준</label>
+        <div class="slider-row">
+          <input type="range" min="30" max="730" value="180" step="10" id="uploadDaySlider"
+            oninput="document.getElementById('uploadDayVal').textContent=this.value+'일'" />
+          <div class="slider-val" id="uploadDayVal">180일</div>
+        </div>
+        <div class="hint">이 기간 동안 새 영상을 올리지 않은 채널을 후보로 분류</div>
+      </div>
+      <div class="field" id="watchDaysField">
+        <label>내 마지막 시청 기준</label>
+        <div class="slider-row">
+          <input type="range" min="30" max="730" value="180" step="10" id="watchDaySlider"
+            oninput="document.getElementById('watchDayVal').textContent=this.value+'일'" />
+          <div class="slider-val" id="watchDayVal">180일</div>
+        </div>
+        <div class="hint">이 기간 동안 내가 한 번도 보지 않은 채널을 후보로 분류</div>
+      </div>
+    </div>
+
+    <!-- 기타 설정 -->
+    <div class="section">
+      <div class="section-title">추가 설정</div>
+      <div class="field">
+        <label>최대 스캔 채널 수</label>
+        <div class="slider-row">
+          <input type="range" min="10" max="500" value="100" step="10" id="limitSlider"
+            oninput="document.getElementById('limitVal').textContent=this.value+'개'" />
+          <div class="slider-val" id="limitVal">100개</div>
+        </div>
+        <div class="hint">API 쿼터 절약용. 일일 10,000 유닛 한도 — 채널당 약 200 유닛 소모</div>
+      </div>
+      <div class="field">
+        <label>화이트리스트 — 제외할 채널 (한 줄에 하나씩)</label>
+        <textarea id="whitelist" placeholder="MKBHD&#10;Linus Tech Tips&#10;UCxxxxxxxxxxxxxx"></textarea>
+        <div class="hint">채널명 부분 일치 또는 채널 ID 직접 입력</div>
+      </div>
+      <div class="field">
+        <div class="toggle-row">
+          <div>
+            <div style="font-size:14px;font-weight:500;">검토 단계 포함 (권장)</div>
+            <div style="font-size:12px;color:var(--hint);margin-top:3px;">OFF 시 스캔 직후 자동 구독 취소</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="previewToggle" checked /><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn btn-primary" onclick="startScan()">스캔 시작</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: 스캔 -->
+  <div id="step3" class="hidden">
+    <div class="section">
+      <div class="section-title">스캔 진행 중</div>
+      <div id="scanStatus" style="font-size:14px;margin-bottom:8px;color:var(--muted);"></div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div style="font-size:12px;color:var(--hint);font-family:'DM Mono',monospace;" id="progressText">0 / 0</div>
+      <div class="log" id="scanLog" style="margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <!-- STEP 4: 검토 -->
+  <div id="step4" class="hidden">
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="num" id="totalCount">-</div>
+        <div class="lbl">스캔한 채널</div>
+      </div>
+      <div class="summary-card danger">
+        <div class="num" id="oldCount">-</div>
+        <div class="lbl">취소 후보</div>
+      </div>
+      <div class="summary-card">
+        <div class="num" id="wlCount">-</div>
+        <div class="lbl">화이트리스트</div>
+      </div>
+    </div>
+    <div class="select-bar">
+      <span id="selectedInfo">0개 선택됨</span>
+      <button class="link-btn" onclick="selectAll()">전체 선택</button>
+      <button class="link-btn" onclick="deselectAll()">전체 해제</button>
+    </div>
+    <div class="channel-list" id="channelList"></div>
+    <div class="btn-row">
+      <button class="btn btn-danger" onclick="confirmUnsub()">선택 채널 구독 취소</button>
+      <button class="btn" onclick="goToStep(2)">← 다시 설정</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: 완료 -->
+  <div id="step5" class="hidden">
+    <div class="section">
+      <div class="section-title">완료</div>
+      <div class="summary-grid">
+        <div class="summary-card danger">
+          <div class="num" id="doneCount">-</div>
+          <div class="lbl">구독 취소됨</div>
+        </div>
+        <div class="summary-card">
+          <div class="num" id="skipCount">0</div>
+          <div class="lbl">건너뜀</div>
+        </div>
+        <div class="summary-card">
+          <div class="num" id="errCount">-</div>
+          <div class="lbl">오류</div>
+        </div>
+      </div>
+      <div class="log" id="doneLog"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="resetAll()">처음부터 다시</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let accessToken = null;
+let scannedChannels = [];
+let selectedIds = new Set();
+let filterMode = 'both';       // 'upload' | 'watch' | 'both'
+let watchHistory = null;       // Map<channelId, Date> — Takeout 파싱 결과
+
+/* ── 모드 선택 ── */
+function selectMode(mode) {
+  filterMode = mode;
+  ['upload','watch','both'].forEach(m => {
+    document.getElementById('mode-'+m).classList.toggle('selected', m === mode);
+  });
+  const needTakeout = mode === 'watch' || mode === 'both';
+  document.getElementById('takeoutSection').classList.toggle('hidden', !needTakeout);
+  document.getElementById('uploadDaysField').classList.toggle('hidden', mode === 'watch');
+  document.getElementById('watchDaysField').classList.toggle('hidden', mode === 'upload');
+}
+// 초기 상태 적용
+selectMode('both');
+
+/* ── Google Takeout JSON 파싱 ── */
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+}
+
+function handleFile(file) {
+  if (!file) return;
+  const status = document.getElementById('uploadStatus');
+  status.textContent = '파싱 중...';
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      // Takeout watch-history.json 구조: 배열, 각 항목에 titleUrl(채널 URL 포함) + time
+      // 채널 ID 추출: subtitles[0].url 또는 titleUrl 에서 channel ID
+      watchHistory = new Map();
+      let parsed = 0;
+      for (const item of data) {
+        // 채널 ID는 subtitles 배열의 url에서 추출
+        const chUrl = item.subtitles?.[0]?.url || '';
+        const chIdMatch = chUrl.match(/channel\/(UC[a-zA-Z0-9_-]{22})/);
+        if (!chIdMatch) continue;
+        const chId = chIdMatch[1];
+        const watchedAt = new Date(item.time);
+        if (isNaN(watchedAt.getTime())) continue;
+        // 채널별 가장 최근 시청일 유지
+        if (!watchHistory.has(chId) || watchHistory.get(chId) < watchedAt) {
+          watchHistory.set(chId, watchedAt);
+        }
+        parsed++;
+      }
+      const zone = document.getElementById('uploadZone');
+      zone.classList.add('loaded');
+      status.textContent = `✓ ${parsed.toLocaleString()}개 시청 기록 로드 완료 (${watchHistory.size}개 채널)`;
+    } catch(err) {
+      document.getElementById('uploadStatus').textContent = '⚠ JSON 파싱 실패 — watch-history.json 파일인지 확인하세요.';
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* ── 스텝 이동 ── */
+function goToStep(n) {
+  [1,2,3,4,5].forEach(i => {
+    document.getElementById('step'+i).classList.toggle('hidden', i !== n);
+    const el = document.getElementById('s'+i);
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+  });
+}
+
+/* ── OAuth ── */
+function startAuth() {
+  const clientId = document.getElementById('clientId').value.trim();
+  if (!clientId) { alert('Client ID를 입력하세요.'); return; }
+  const scope = 'https://www.googleapis.com/auth/youtube';
+  const redirect = location.origin + location.pathname;
+  const params = new URLSearchParams({ client_id: clientId, redirect_uri: redirect, response_type: 'token', scope, include_granted_scopes: 'true' });
+  sessionStorage.setItem('yt_client_id', clientId);
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params;
+}
+
+function checkTokenFromUrl() {
+  const hash = window.location.hash;
+  if (!hash) return;
+  const params = new URLSearchParams(hash.substring(1));
+  const token = params.get('access_token');
+  if (token) {
+    accessToken = token;
+    history.replaceState(null, '', location.pathname);
+    const savedId = sessionStorage.getItem('yt_client_id');
+    if (savedId) document.getElementById('clientId').value = savedId;
+    document.getElementById('authStatus').textContent = '✓ 인증 성공';
+    goToStep(2);
+  }
+}
+
+/* ── API 헬퍼 ── */
+async function ytGet(url) {
+  const res = await fetch(url, { headers: { Authorization: 'Bearer ' + accessToken } });
+  if (res.status === 401) throw new Error('토큰 만료. 페이지를 새로고침하고 다시 로그인하세요.');
+  if (res.status === 403) throw new Error('API 쿼터 초과 또는 권한 오류.');
+  if (!res.ok) throw new Error('API 오류 ' + res.status);
+  return res.json();
+}
+async function ytDelete(url) {
+  const res = await fetch(url, { method: 'DELETE', headers: { Authorization: 'Bearer ' + accessToken } });
+  return res.status === 204;
+}
+
+/* ── 로그 ── */
+function addLog(id, text, cls) {
+  const el = document.getElementById(id);
+  const line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = text;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+/* ── 스캔 ── */
+async function startScan() {
+  const needWatch = filterMode === 'watch' || filterMode === 'both';
+  if (needWatch && !watchHistory) {
+    alert('시청 기록 기준이 포함된 모드입니다.\nwatch-history.json 파일을 먼저 업로드하세요.');
+    return;
+  }
+
+  const uploadDays = parseInt(document.getElementById('uploadDaySlider').value);
+  const watchDays  = parseInt(document.getElementById('watchDaySlider').value);
+  const limit      = parseInt(document.getElementById('limitSlider').value);
+  const wlRaw      = document.getElementById('whitelist').value;
+  const whitelist  = wlRaw.split('\n').map(s => s.trim().toLowerCase()).filter(Boolean);
+
+  const uploadCutoff = Date.now() - uploadDays * 86400000;
+  const watchCutoff  = Date.now() - watchDays  * 86400000;
+
+  goToStep(3);
+  scannedChannels = [];
+  document.getElementById('scanLog').innerHTML = '';
+  document.getElementById('scanStatus').textContent = '구독 채널 목록 불러오는 중...';
+
+  try {
+    let subs = [];
+    let pageToken = '';
+    do {
+      const url = `https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&mine=true&maxResults=50${pageToken ? '&pageToken=' + pageToken : ''}&order=alphabetical`;
+      const data = await ytGet(url);
+      subs = subs.concat(data.items || []);
+      pageToken = data.nextPageToken || '';
+      if (subs.length >= limit) break;
+    } while (pageToken);
+    subs = subs.slice(0, limit);
+
+    const total = subs.length;
+    document.getElementById('progressText').textContent = '0 / ' + total;
+    addLog('scanLog', `총 ${total}개 채널 스캔 시작 [모드: ${filterMode}]`, 'log-info');
+
+    for (let i = 0; i < subs.length; i++) {
+      const sub = subs[i];
+      const channelId = sub.snippet.resourceId.channelId;
+      const title = sub.snippet.title;
+      const thumb = sub.snippet?.thumbnails?.default?.url || '';
+
+      document.getElementById('scanStatus').textContent = `스캔 중 (${i+1}/${total}): ${title}`;
+      document.getElementById('progressFill').style.width = Math.round((i+1)/total*100) + '%';
+      document.getElementById('progressText').textContent = `${i+1} / ${total}`;
+
+      const isWL = whitelist.some(w => title.toLowerCase().includes(w) || channelId.toLowerCase() === w);
+
+      // 업로드 기준
+      let lastUpload = null, lastUploadStr = '알 수 없음', uploadDiffDays = null;
+      if (filterMode !== 'watch') {
+        try {
+          const chData = await ytGet(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}`);
+          const uploadsId = chData.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+          if (uploadsId) {
+            const vData = await ytGet(`https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${uploadsId}&maxResults=1`);
+            const pub = vData.items?.[0]?.contentDetails?.videoPublishedAt;
+            if (pub) {
+              lastUpload = new Date(pub);
+              uploadDiffDays = Math.floor((Date.now() - lastUpload.getTime()) / 86400000);
+              lastUploadStr = `${uploadDiffDays}일 전`;
+            }
+          }
+        } catch(e) { lastUploadStr = '조회 실패'; }
+      }
+
+      // 시청 기준
+      let lastWatch = null, lastWatchStr = '기록 없음', watchDiffDays = null;
+      if (filterMode !== 'upload' && watchHistory) {
+        lastWatch = watchHistory.get(channelId) || null;
+        if (lastWatch) {
+          watchDiffDays = Math.floor((Date.now() - lastWatch.getTime()) / 86400000);
+          lastWatchStr = `${watchDiffDays}일 전`;
+        } else {
+          lastWatchStr = '시청 기록 없음';
+        }
+      }
+
+      // 후보 판정
+      const uploadOld = filterMode !== 'watch'
+        ? (lastUpload ? lastUpload.getTime() < uploadCutoff : true)
+        : true;
+      const watchOld = filterMode !== 'upload'
+        ? (lastWatch ? lastWatch.getTime() < watchCutoff : true)
+        : true;
+
+      let isCandidate;
+      if (filterMode === 'upload') isCandidate = uploadOld;
+      else if (filterMode === 'watch') isCandidate = watchOld;
+      else isCandidate = uploadOld && watchOld; // both = AND
+
+      const logParts = [];
+      if (filterMode !== 'watch') logParts.push(`업로드: ${lastUploadStr}`);
+      if (filterMode !== 'upload') logParts.push(`시청: ${lastWatchStr}`);
+
+      const prefix = isCandidate && !isWL ? '⚠' : isWL ? '🔒' : '✓';
+      const logCls = isCandidate && !isWL ? 'log-err' : 'log-ok';
+      addLog('scanLog', `${prefix} ${title} — ${logParts.join(' / ')}${isWL ? ' [화이트리스트]' : ''}`, logCls);
+
+      scannedChannels.push({
+        subscriptionId: sub.id, channelId, title, thumb,
+        lastUpload, lastUploadStr, uploadDiffDays,
+        lastWatch, lastWatchStr, watchDiffDays,
+        isCandidate, isWL
+      });
+
+      await new Promise(r => setTimeout(r, 80));
+    }
+
+    const preview = document.getElementById('previewToggle').checked;
+    if (preview) { buildReviewStep(); goToStep(4); }
+    else {
+      selectedIds = new Set(scannedChannels.filter(c => c.isCandidate && !c.isWL).map(c => c.channelId));
+      await executeUnsub();
+    }
+  } catch(e) {
+    addLog('scanLog', '오류: ' + e.message, 'log-err');
+    document.getElementById('scanStatus').textContent = '오류 발생';
+  }
+}
+
+/* ── 검토 빌드 ── */
+function buildReviewStep() {
+  const candidates = scannedChannels.filter(c => c.isCandidate && !c.isWL);
+  document.getElementById('totalCount').textContent = scannedChannels.length;
+  document.getElementById('oldCount').textContent = candidates.length;
+  document.getElementById('wlCount').textContent = scannedChannels.filter(c => c.isWL).length;
+  selectedIds = new Set(candidates.map(c => c.channelId));
+  renderChannelList();
+}
+
+function renderChannelList() {
+  const list = document.getElementById('channelList');
+  list.innerHTML = '';
+  const toShow = scannedChannels.filter(c => c.isCandidate || c.isWL);
+  toShow.sort((a, b) => {
+    if (a.isCandidate && !a.isWL && !(b.isCandidate && !b.isWL)) return -1;
+    if (!(a.isCandidate && !a.isWL) && b.isCandidate && !b.isWL) return 1;
+    const aMax = Math.max(a.uploadDiffDays||0, a.watchDiffDays||0);
+    const bMax = Math.max(b.uploadDiffDays||0, b.watchDiffDays||0);
+    return bMax - aMax;
+  });
+
+  if (toShow.length === 0) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--hint);font-size:13px;">후보 채널이 없습니다. 기준 일수를 줄여보세요.</div>';
+    return;
+  }
+
+  toShow.forEach(c => {
+    const card = document.createElement('div');
+    const isSelected = selectedIds.has(c.channelId);
+    card.className = 'channel-card' + (isSelected ? ' selected' : '') + (c.isWL ? ' whitelisted' : '');
+
+    const initials = c.title.replace(/[^a-zA-Z가-힣]/g, '').charAt(0).toUpperCase() || '?';
+    const badgeClass = c.isWL ? 'badge-wl' : c.isCandidate ? 'badge-old' : 'badge-ok';
+    const badgeText  = c.isWL ? '보호됨' : c.isCandidate ? '후보' : '활성';
+
+    const metaLines = [];
+    if (filterMode !== 'watch')  metaLines.push(`업로드: ${c.lastUploadStr}`);
+    if (filterMode !== 'upload') metaLines.push(`시청: ${c.lastWatchStr}`);
+
+    card.innerHTML = `
+      <div class="ch-avatar">${c.thumb ? `<img src="${escHtml(c.thumb)}" onerror="this.parentNode.textContent='${initials}'" />` : initials}</div>
+      <div class="ch-info">
+        <div class="ch-name">${escHtml(c.title)}</div>
+        <div class="ch-meta">${metaLines.join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>
+      </div>
+      <div class="badge ${badgeClass}">${badgeText}</div>
+      ${!c.isWL ? `<div class="ch-check${isSelected ? ' checked' : ''}" onclick="toggleSelect('${c.channelId}',this)">✓</div>` : '<div style="width:22px"></div>'}
+    `;
+    list.appendChild(card);
+  });
+  updateSelectedInfo();
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function toggleSelect(id, el) {
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  const card = el.closest('.channel-card');
+  card.classList.toggle('selected', selectedIds.has(id));
+  el.classList.toggle('checked', selectedIds.has(id));
+  updateSelectedInfo();
+}
+function updateSelectedInfo() { document.getElementById('selectedInfo').textContent = selectedIds.size + '개 선택됨'; }
+function selectAll() { scannedChannels.filter(c => c.isCandidate && !c.isWL).forEach(c => selectedIds.add(c.channelId)); renderChannelList(); }
+function deselectAll() { selectedIds.clear(); renderChannelList(); }
+
+async function confirmUnsub() {
+  if (selectedIds.size === 0) { alert('선택된 채널이 없습니다.'); return; }
+  const ok = confirm(`${selectedIds.size}개 채널을 구독 취소합니다.\n이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?`);
+  if (!ok) return;
+  await executeUnsub();
+}
+
+async function executeUnsub() {
+  goToStep(5);
+  document.getElementById('doneLog').innerHTML = '';
+  let done = 0, err = 0;
+  const targets = scannedChannels.filter(c => selectedIds.has(c.channelId));
+  for (const ch of targets) {
+    try {
+      const ok = await ytDelete(`https://www.googleapis.com/youtube/v3/subscriptions?id=${ch.subscriptionId}`);
+      if (ok) { done++; addLog('doneLog', '✓ 구독 취소: ' + ch.title, 'log-ok'); }
+      else { err++; addLog('doneLog', '✗ 실패: ' + ch.title, 'log-err'); }
+    } catch(e) { err++; addLog('doneLog', '✗ 오류: ' + ch.title + ' — ' + e.message, 'log-err'); }
+    await new Promise(r => setTimeout(r, 350));
+  }
+  document.getElementById('doneCount').textContent = done;
+  document.getElementById('errCount').textContent = err;
+}
+
+function resetAll() {
+  accessToken = null; scannedChannels = []; selectedIds.clear(); watchHistory = null;
+  document.getElementById('scanLog').innerHTML = '';
+  document.getElementById('channelList').innerHTML = '';
+  document.getElementById('uploadZone').classList.remove('loaded');
+  document.getElementById('uploadStatus').textContent = '클릭하거나 파일을 끌어다 놓으세요';
+  goToStep(1);
+}
+
+checkTokenFromUrl();
+</script>
+</body>
+</html>
